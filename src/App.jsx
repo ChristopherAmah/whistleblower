@@ -189,7 +189,7 @@ function App() {
 
           <label>
             Subject
-            <input type="text" name="subject" required />
+            <input type="text" name="subject" minLength="3" required />
           </label>
 
           <label>
@@ -198,6 +198,7 @@ function App() {
               name="details"
               rows="8"
               placeholder="Explain what happened. Include names, dates, locations and any other relevant details."
+              minLength="10"
               required
             />
           </label>

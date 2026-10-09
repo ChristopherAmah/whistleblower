@@ -2,24 +2,6 @@
 import crypto from 'node:crypto'
 
 const RECIPIENT = 'whistleblower@cwg-plc.com'
-const allowedRelationships = new Set([
-  'Director',
-  'Employee',
-  'Contractor',
-  'Supplier',
-  'Partner',
-  'Consultant',
-  'Other',
-])
-const allowedConcernTypes = new Set([
-  'Fraud or financial misconduct',
-  'Bribery or corruption',
-  'Harassment or discrimination',
-  'Health or safety concern',
-  'Data or privacy breach',
-  'Conflict of interest',
-  'Other unethical conduct',
-])
 
 function clean(value, maxLength) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : ''
@@ -67,13 +49,16 @@ export default async function handler(request, response) {
   const incidentDate = clean(body.incidentDate, 20)
   const location = clean(body.location, 200)
 
-  if (
-    !allowedRelationships.has(relationship) ||
-    !allowedConcernTypes.has(concernType) ||
-    subject.length < 3 ||
-    details.length < 10
-  ) {
-    return response.status(400).json({ message: 'Please complete all required fields.' })
+  const invalidFields = []
+  if (!relationship) invalidFields.push('relationship to CWG')
+  if (!concernType) invalidFields.push('type of concern')
+  if (subject.length < 3) invalidFields.push('subject (minimum 3 characters)')
+  if (details.length < 10) invalidFields.push('report details (minimum 10 characters)')
+
+  if (invalidFields.length) {
+    return response.status(400).json({
+      message: `Please check the following: ${invalidFields.join(', ')}.`,
+    })
   }
 
   if (!anonymous && (!name || !validEmail(email))) {
