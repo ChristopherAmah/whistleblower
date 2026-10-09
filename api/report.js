@@ -35,9 +35,14 @@ export default async function handler(request, response) {
     return response.status(405).json({ message: 'Method not allowed.' })
   }
 
-  if (!process.env.RESEND_API_KEY || !process.env.REPORT_FROM_EMAIL) {
-    console.error('Missing RESEND_API_KEY or REPORT_FROM_EMAIL')
+  if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_FROM_EMAIL) {
+    console.error('Missing SENDGRID_API_KEY or SENDGRID_FROM_EMAIL')
     return response.status(503).json({ message: 'Email delivery is not configured.' })
+  }
+
+  if (!validEmail(process.env.SENDGRID_FROM_EMAIL)) {
+    console.error('SENDGRID_FROM_EMAIL is not a valid email address')
+    return response.status(503).json({ message: 'The email sender is not configured correctly.' })
   }
 
   const body = request.body || {}
@@ -96,24 +101,33 @@ export default async function handler(request, response) {
   ].join('\n')
 
   try {
-    const resendResponse = await fetch('https://api.resend.com/emails', {
+    const sendGridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
         'Content-Type': 'application/json',
-        'Idempotency-Key': referenceId,
       },
       body: JSON.stringify({
-        from: process.env.REPORT_FROM_EMAIL,
-        to: [RECIPIENT],
+        personalizations: [
+          {
+            to: [{ email: RECIPIENT }],
+            subject: `[Whistleblower Report] ${subject}`,
+            custom_args: { reference_id: referenceId },
+          },
+        ],
+        from: {
+          email: process.env.SENDGRID_FROM_EMAIL,
+          name: process.env.SENDGRID_FROM_NAME || 'CWG Whistleblower',
+        },
+        reply_to: anonymous ? undefined : { email, name },
         subject: `[Whistleblower Report] ${subject}`,
-        text: reportText,
+        content: [{ type: 'text/plain', value: reportText }],
       }),
     })
 
-    if (!resendResponse.ok) {
-      const providerError = await resendResponse.text()
-      console.error('Resend delivery failed:', resendResponse.status, providerError)
+    if (!sendGridResponse.ok) {
+      const providerError = await sendGridResponse.text()
+      console.error('SendGrid delivery failed:', sendGridResponse.status, providerError)
       return response.status(502).json({ message: 'Email delivery failed. Please try again.' })
     }
 
