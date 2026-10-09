@@ -2,7 +2,7 @@
 import { Buffer } from 'node:buffer'
 import crypto from 'node:crypto'
 
-const RECIPIENT = 'christopheramah1@gmail.com'
+const RECIPIENT = 'whistleblower@cwg-plc.com'
 const MAX_EVIDENCE_SIZE = 2.5 * 1024 * 1024
 const allowedEvidenceTypes = new Set([
   'application/pdf',
