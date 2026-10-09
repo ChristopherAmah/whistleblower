@@ -96,7 +96,7 @@ export default async function handler(request, response) {
         personalizations: [
           {
             to: [{ email: RECIPIENT }],
-            subject: `[Whistleblower Report] ${subject}`,
+            subject: `Whistleblower Report - ${subject}`,
             custom_args: { reference_id: referenceId },
           },
         ],
@@ -105,7 +105,7 @@ export default async function handler(request, response) {
           name: process.env.SENDGRID_FROM_NAME || 'CWG Whistleblower',
         },
         reply_to: anonymous ? undefined : { email, name },
-        subject: `[Whistleblower Report] ${subject}`,
+        subject: `Whistleblower Report - ${subject}`,
         content: [{ type: 'text/plain', value: reportText }],
       }),
     })
