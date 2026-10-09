@@ -17,6 +17,17 @@ const policyItems = [
   'The whistle blower should make his/her report under this policy to the dedicated email whistleblower@cwg-plc.com.',
 ]
 
+const MAX_EVIDENCE_SIZE = 2.5 * 1024 * 1024
+
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result).split(',')[1])
+    reader.onerror = () => reject(new Error('The evidence file could not be read.'))
+    reader.readAsDataURL(file)
+  })
+}
+
 function App() {
   const [anonymous, setAnonymous] = useState(true)
   const [notice, setNotice] = useState(null)
@@ -27,11 +38,27 @@ function App() {
     event.preventDefault()
     const form = event.currentTarget
     const formData = new FormData(form)
+    const evidenceFile = formData.get('evidence')
 
     setSubmitting(true)
     setNotice(null)
 
     try {
+      let evidence = null
+
+      if (evidenceFile instanceof File && evidenceFile.size > 0) {
+        if (evidenceFile.size > MAX_EVIDENCE_SIZE) {
+          throw new Error('The evidence file must be 2.5 MB or smaller.')
+        }
+
+        evidence = {
+          name: evidenceFile.name,
+          type: evidenceFile.type,
+          size: evidenceFile.size,
+          content: await readFileAsBase64(evidenceFile),
+        }
+      }
+
       const response = await fetch('/api/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -45,6 +72,7 @@ function App() {
           details: formData.get('details'),
           incidentDate: formData.get('incidentDate') || '',
           location: formData.get('location') || '',
+          evidence,
           website: formData.get('website') || '',
           startedAt: formStartedAt,
         }),
@@ -213,6 +241,18 @@ function App() {
               <input type="text" name="location" />
             </label>
           </div>
+
+          <label>
+            Supporting evidence <span>(optional)</span>
+            <input
+              type="file"
+              name="evidence"
+              accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.txt"
+            />
+            <small className="field-hint">
+              PDF, JPG, PNG, Word or text file. Maximum size: 2.5 MB.
+            </small>
+          </label>
 
           <label className="checkbox-label">
             <input type="checkbox" required />

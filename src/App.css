@@ -49,7 +49,7 @@ form > label, form > .two-columns { margin-bottom: 20px; }
 form label:not(.checkbox-label) { display: grid; gap: 7px; }
 label span { color: #666; font-size: 12px; font-weight: 400; }
 
-input[type='text'], input[type='email'], input[type='date'], select, textarea {
+input[type='text'], input[type='email'], input[type='date'], input[type='file'], select, textarea {
   width: 100%;
   padding: 10px 11px;
   color: #222;
@@ -58,6 +58,18 @@ input[type='text'], input[type='email'], input[type='date'], select, textarea {
   border-radius: 2px;
   outline: none;
 }
+
+input[type='file'] { padding: 8px; }
+input[type='file']::file-selector-button {
+  margin-right: 10px;
+  padding: 7px 10px;
+  color: #162476;
+  background: #f1f1f1;
+  border: 1px solid #aaa;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.field-hint { color: #666; font-size: 12px; font-weight: 400; }
 
 input[type='text'], input[type='email'], input[type='date'], select { min-height: 44px; }
 
@@ -100,7 +112,7 @@ footer { margin-top: 50px; padding-top: 18px; border-top: 1px solid #ddd; color:
   .two-columns { grid-template-columns: 1fr; gap: 20px; }
   .radio-group { flex-direction: column; gap: 12px; }
   .radio-group label { min-height: 32px; }
-  input[type='text'], input[type='email'], input[type='date'], select, textarea { font-size: 16px; }
+  input[type='text'], input[type='email'], input[type='date'], input[type='file'], select, textarea { font-size: 16px; }
   button { width: 100%; min-height: 48px; }
   .important-note { margin: 18px 0 24px; padding: 12px 14px; }
   footer { margin-top: 40px; }
