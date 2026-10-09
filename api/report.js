@@ -1,7 +1,7 @@
 /* global process */
 import crypto from 'node:crypto'
 
-const RECIPIENT = 'christopheramah1@gmail.com'
+const RECIPIENT = 'whistleblower@cwg-plc.com'
 
 function clean(value, maxLength) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : ''
